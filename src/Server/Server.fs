@@ -8,17 +8,7 @@ open Giraffe.Core
 open Shared
 
 type Storage() =
-    let todos = ResizeArray<_>()
     let tweets = ResizeArray<_>()
-
-    member __.GetTodos() = List.ofSeq todos
-
-    member __.AddTodo(todo: Todo) =
-        if Todo.isValid todo.Description then
-            todos.Add todo
-            Ok()
-        else
-            Error "Invalid todo"
 
     member __.GetTweets() = List.ofSeq tweets
 
@@ -31,39 +21,14 @@ type Storage() =
 
 let storage = Storage()
 
-storage.AddTodo(Todo.create "Create new SAFE project")
-|> ignore
-
-storage.AddTodo(Todo.create "Write your app")
-|> ignore
-
-storage.AddTodo(Todo.create "Ship it !!!")
-|> ignore
-
 storage.AddTweet(
     { Comment = "Hello tuite"
       Username = "BernardoDCGA" }
 )
 |> ignore
 
-let todosApi =
-    { getTodos = fun () -> async { return storage.GetTodos() }
-      addTodo =
-          fun todo ->
-              async {
-                  match storage.AddTodo todo with
-                  | Ok () -> return todo
-                  | Error e -> return failwith e
-              } }
-
-let todosApp =
-    Remoting.createApi ()
-    |> Remoting.withRouteBuilder Route.builder
-    |> Remoting.fromValue todosApi
-    |> Remoting.buildHttpHandler
-
 let tweetsApi: ITweetsApi =
-    { getTweets = fun () -> async { return storage.GetTweets() }
+    { getTweets = fun () -> async { return List.rev (storage.GetTweets()) }
       postTweet =
           fun t ->
               async {
@@ -79,7 +44,7 @@ let tweetsApp =
     |> Remoting.fromValue tweetsApi
     |> Remoting.buildHttpHandler
 
-let appRouter = choose [ tweetsApp; todosApp ]
+let appRouter = tweetsApp
 
 let app =
     application {

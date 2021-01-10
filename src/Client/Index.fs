@@ -20,9 +20,7 @@ let todosApi =
     |> Remoting.buildProxy<ITweetsApi>
 
 let init (): Model * Cmd<Msg> =
-    let model =
-        { Tweets = []
-          TweetComment = "" }
+    let model = { Tweets = []; TweetComment = "" }
 
     let cmd =
         Cmd.OfAsync.perform todosApi.getTweets () GotTweets
@@ -63,10 +61,10 @@ let view (model: Model) (dispatch: Msg -> unit) =
                         span [] [ str tweet.Comment ]
                     ])
                 model.Tweets)
-        div [] [   
+        div [] [
             textarea [ Value model.TweetComment
                        OnChange(fun evt -> dispatch (TweetCommentChanged evt.Value))
-                       Placeholder "Say something..."] []
+                       Placeholder "Say something..." ] []
             button [ OnClick(fun _ -> dispatch PostTweet) ] [
                 str "Tweet something"
             ]
