@@ -15,4 +15,14 @@ let shared =
           <| fun _ ->
               let expected = false
               let actual = Todo.isValid ""
+              Expect.equal actual expected "Should be false"
+          testCase "Tweet needs username"
+          <| fun _ ->
+              let expected = false
+
+              let actual =
+                  Tweet.isValid
+                      { Comment = "With Comment"
+                        Username = "" }
+
               Expect.equal actual expected "Should be false" ]
